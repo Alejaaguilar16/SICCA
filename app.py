@@ -28,17 +28,24 @@ def convertir_blackboard_si_es_xls(archivo_subido):
 
     if nombre.endswith(".xls"):
 
-        df = pd.read_excel(
-            ruta_original,
-            engine="xlrd"
+        try:
+            # intenta como XLS real
+            df = pd.read_excel(
+                ruta_original,
+                engine="xlrd"
+            )
+
+        except Exception:
+            # si Blackboard exportó texto tabulado disfrazado de .xls
+            df = pd.read_csv(
+                ruta_original,
+                sep="\t",
+                encoding="utf-16"
+            )
+
+        ruta_convertida = (
+            ruta_original + "x"
         )
-
-        # Limpieza por tabulaciones / caracteres raros
-        df = df.replace(r'\t',' ', regex=True)
-        df = df.replace(r'\n',' ', regex=True)
-        df = df.replace('_x0000_','', regex=True)
-
-        ruta_convertida = ruta_original + "x"
 
         df.to_excel(
             ruta_convertida,
@@ -51,7 +58,6 @@ def convertir_blackboard_si_es_xls(archivo_subido):
     raise Exception(
         "Formato Blackboard no soportado"
     )
-
 # LIMPIEZA
 
 def limpiar_columnas(df):
