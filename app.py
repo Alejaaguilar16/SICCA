@@ -29,23 +29,22 @@ def convertir_blackboard_si_es_xls(archivo_subido):
     if nombre.endswith(".xls"):
 
         try:
-            # intenta como XLS real
+            # primero intenta xls real
             df = pd.read_excel(
                 ruta_original,
                 engine="xlrd"
             )
 
-        except Exception:
-            # si Blackboard exportó texto tabulado disfrazado de .xls
+        except:
+            # Blackboard falso .xls (UTF16 tabulado)
             df = pd.read_csv(
                 ruta_original,
                 sep="\t",
-                encoding="utf-16"
+                encoding="utf-16",
+                engine="python"
             )
 
-        ruta_convertida = (
-            ruta_original + "x"
-        )
+        ruta_convertida = ruta_original + ".xlsx"
 
         df.to_excel(
             ruta_convertida,
@@ -53,11 +52,10 @@ def convertir_blackboard_si_es_xls(archivo_subido):
             engine="openpyxl"
         )
 
+        # ⚠️ DEVUELVE EL NUEVO XLSX REAL
         return ruta_convertida
 
-    raise Exception(
-        "Formato Blackboard no soportado"
-    )
+    raise Exception("Formato no soportado")
 # LIMPIEZA
 
 def limpiar_columnas(df):
