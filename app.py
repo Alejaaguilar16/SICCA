@@ -28,41 +28,25 @@ def convertir_blackboard_si_es_xls(archivo_subido):
 
     if nombre.endswith(".xls"):
 
-        import win32com.client as win32
-
-        excel = win32.Dispatch(
-            "Excel.Application"
+        df = pd.read_excel(
+            ruta_original,
+            engine="xlrd"
         )
 
-        excel.Visible = False
-        excel.DisplayAlerts = False
+        # Limpieza por tabulaciones / caracteres raros
+        df = df.replace(r'\t',' ', regex=True)
+        df = df.replace(r'\n',' ', regex=True)
+        df = df.replace('_x0000_','', regex=True)
 
-        try:
+        ruta_convertida = ruta_original + "x"
 
-            wb = excel.Workbooks.Open(
-                os.path.abspath(
-                    ruta_original
-                ),
-                CorruptLoad=1
-            )
+        df.to_excel(
+            ruta_convertida,
+            index=False,
+            engine="openpyxl"
+        )
 
-            ruta_convertida = (
-                ruta_original + "x"
-            )
-
-            wb.SaveAs(
-                os.path.abspath(
-                    ruta_convertida
-                ),
-                FileFormat=51
-            )
-
-            wb.Close()
-
-            return ruta_convertida
-
-        finally:
-            excel.Quit()
+        return ruta_convertida
 
     raise Exception(
         "Formato Blackboard no soportado"
